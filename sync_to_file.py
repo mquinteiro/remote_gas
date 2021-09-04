@@ -10,7 +10,7 @@ from google.cloud import storage
 from google.cloud import pubsub
 from cep_credentials import con_string
 
-gce_cert_json_name = 'gce_cert.json'
+gce_cert_json_name = 'mquinteiro-4d9a8b6e4b6d.json'
 
 # Upload file to GCS
 def upload_gcs(file_name):
