@@ -128,7 +128,7 @@ def main():
             for item in strings:
                 f.write("%s\r\n" % item)
         last_sync = open("last_sync.txt", "w")
-        last_sync.write(ahora)
+        last_sync.write(str(ahora))
         last_sync.close()
         log.write (f"start gce upload: {datetime.datetime.now}\r\n")
         upload_gcs(file_name)
