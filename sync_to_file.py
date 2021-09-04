@@ -97,8 +97,8 @@ def main():
     #call(["/usr/sbin/vpnc", "test"])
     log = open("gasSync.log", "a+")
     try:
-        last_sync = open("last_sync.txt", "r")
-        last_sync_date = last_sync.read()
+        with open("last_sync.txt", "r") as last_sync:
+                last_sync_date = last_sync.read()
         last_sync.close()
         if last_sync_date:
             last_sync_date = datetime.datetime.strptime(last_sync_date, "%Y-%m-%d %H:%M:%S.%f")
