@@ -1,6 +1,7 @@
 #!/usr/bin/python3.5
 
 import pyodbc
+import os
 from subprocess import call
 
 import numbers
@@ -97,8 +98,9 @@ def main():
     #call(["/usr/sbin/vpnc", "test"])
     log = open("gasSync.log", "a+")
     try:
-        with open("last_sync.txt", "r") as last_sync:
-                last_sync_date = last_sync.read()
+        if os.path.exists("last_sync.txt"):
+            with open("last_sync.txt", "r") as last_sync:
+                    last_sync_date = last_sync.read()
         if last_sync_date:
             last_sync_date = datetime.datetime.strptime(last_sync_date, "%Y-%m-%d %H:%M:%S.%f")
         else:
