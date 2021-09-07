@@ -133,7 +133,6 @@ def main():
         log.write (f"start gce upload: {datetime.datetime.now}\r\n")
         upload_gcs(file_name)
         log.write (f"***Sync_End: {datetime.datetime.now}\r\n")
-        log.close()
     finally:
         #call(["/usr/sbin/vpnc-disconnect"])
         log.write (f"******** SYNC_FAILURE: {datetime.datetime.now}\r\n")
