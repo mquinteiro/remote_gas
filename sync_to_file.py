@@ -21,7 +21,7 @@ def upload_gcs(file_name):
     # notify to pubsub
     topic = 'projects/mquinteiro/topics/cepsa_sync'
     publisher = pubsub.PublisherClient.from_service_account_json(gce_cert_json_name)
-    publisher.publish(topic, file_name)
+    publisher.publish(topic, file_name.encode('utf-8'))
     
 
 
