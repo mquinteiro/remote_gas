@@ -1,0 +1,8 @@
+dsn = 'cepsaDS'
+user = 'CEGHCB'
+password = 'CEGHCB'
+database = 'tgl_db'
+#con_string = 'DRIVER=cepsaDRIVEROLD;Server=172.30.5.92,50657;Uid=CEGHCB;Pwd=CEGHCB'
+con_string = 'DSN=mqa;Uid=CEGHCB;Pwd=CEGHCB'
+
+gce_cert_json_name = 'mquinteiro-8ef43ab73aee.json'

@@ -15,7 +15,7 @@ from cep_credentials import con_string, gce_cert_json_name
 # Upload file to GCS
 def upload_gcs(file_name):
     storage_client = storage.Client.from_service_account_json(gce_cert_json_name)
-    bucket = storage_client.get_bucket('cepsa_shares')
+    bucket = storage_client.bucket('cepsa_shares')
     blob = bucket.blob(file_name)
     blob.upload_from_filename(file_name)
     # notify to pubsub
