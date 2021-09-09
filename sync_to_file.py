@@ -1,5 +1,6 @@
 #!/usr/bin/python3.5
 
+from time import sleep
 import pyodbc
 import os
 from subprocess import call
@@ -137,6 +138,7 @@ def main():
         #call(["/usr/sbin/vpnc-disconnect"])
         log.write (f"******** SYNC_FAILURE: {datetime.datetime.now}\r\n")
         log.close()
+        sleep(5)
 
 
 if __name__ == '__main__':

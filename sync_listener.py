@@ -1,5 +1,5 @@
 from datetime import datetime
-from download_file import dowload_strings, bucket_name
+from download_file import dowload_strings, bucket_name, move_to_failed, move_to_processed
 from google.cloud import pubsub_v1  
 from time import sleep
 from cep_credentials import gce_cert_json_name, cic_host, cic_user, cic_pass, cic_database
@@ -34,13 +34,17 @@ def main():
                     # todo dowload file form cloud and execute mysqldump with it.
                     if not strings:
                         subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
-                        print("Removing msg without file")
+                        try:
+                            move_to_failed(bucket_name, msg.message.data)
+                        finally:
+                            print(f"Removing msg without file {msg.message.data}")
                     else:
                         print("Starting dump at:", datetime.now())
                         subscriber.modify_ack_deadline(subscription=sub_path, ack_ids=[msg.ack_id],ack_deadline_seconds=60)
                         querys = strings.replace(b'\r',b'').split(b'\n')
                         exec_query(querys)
                         subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
+                        move_to_processed(bucket_name, msg.message.data)
                         print("Finishing dump at:", datetime.now())
                         print("Everithing is done, I'm going to sleep")
             sleep(1)
