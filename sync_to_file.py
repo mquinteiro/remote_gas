@@ -120,8 +120,8 @@ def main():
         #syncTable("DepositosAux") #jfp 7/3/19 Ya no Sincronzamo DAux 
         #ahora= datetime.datetime.now()
         #log.write ("Sync_DepositosAux: %s \r\n" %ahora)
-        strings += syncTable_strings("DepositosAux")
-        strings += syncTable_strings("Telemedidas")
+        #strings += syncTable_strings("DepositosAux")
+        #strings += syncTable_strings("Telemedidas")
         log.write (f"end Sync_Telemedidas: {datetime.datetime.now}\r\n")
         strings += syncLecuturas_strings(last_sync_date)
         log.write (f"end Sync_Lecturas: {datetime.datetime.now}\r\n")
