@@ -13,11 +13,21 @@ def dowload_strings(bucket_name, blob_name):
         
     return None
 
+
 def download_file(bucket_name, blob_name):
     storage_client = storage.Client.from_service_account_json(gce_cert_json_name)
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(file_name)
     blob.download_to_filename(file_name)
+
+
+def move_file(bucket_name, blob_name, new_name):
+    storage_client = storage.Client.from_service_account_json(gce_cert_json_name)
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+
+    new_blob = bucket.rename_blob(blob, new_name)
+
 
 if __name__ == '__main__':    
     if len(argv) <2:

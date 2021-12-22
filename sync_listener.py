@@ -1,5 +1,5 @@
 from datetime import datetime
-from download_file import dowload_strings, bucket_name
+from download_file import dowload_strings, bucket_name, move_file
 from google.cloud import pubsub_v1  
 from time import sleep
 from cep_credentials import gce_cert_json_name, cic_host, cic_user, cic_pass, cic_database
@@ -21,32 +21,49 @@ def exec_query(queries):
 def main():
 
     with pubsub_v1.SubscriberClient.from_service_account_json(gce_cert_json_name) as subscriber:
-        sub_path=subscriber.subscription_path(
+        sub_path = subscriber.subscription_path(
             'mquinteiro', 'cepsa_sync-sub')
         print('Listening for messages on {}'.format(sub_path))
         while True:
             response = subscriber.pull(subscription=sub_path, max_messages=1)
             if response:
+                names = []
                 for msg in response.received_messages:
                     print("Received message for file:", msg.message.data)
-                    strings = dowload_strings(bucket_name, msg.message.data)
-                    # print(strings)
-                    # todo dowload file form cloud and execute mysqldump with it.
-                    if not strings:
+                    names.append(msg.message.data)
+                    try:
+                        strings = dowload_strings(bucket_name, msg.message.data)
+                        # print(strings)
+                        # todo dowload file form cloud and execute mysqldump with it.
+                        if not strings:
+                            subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
+                            print("Removing msg without file")
+                            raise Exception(f"Empty file: {msg.message.data}")
+                        else:
+                            print("Starting dump at:", datetime.now())
+                            subscriber.modify_ack_deadline(subscription=sub_path, ack_ids=[msg.ack_id],ack_deadline_seconds=60)
+                            querys = strings.replace(b'\r',b'').split(b'\n')
+                            exec_query(querys)
+                            subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
+                            print("Finishing dump at:", datetime.now())
+                            print("Everithing is done, I'm going to sleep")
+                    except Exception as e:
+                        print(e)
                         subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
-                        print("Removing msg without file")
+                        print(f"Removing msg with error: failed to process {msg.message.data}")
+                        try:
+                            move_file(bucket_name, msg.message.data, "error/"+msg.message.data)
+                        except Exception as e:
+                            print(e)
+                            print(f"Failed to move error {msg.message.data} file to error folder")
                     else:
-                        print("Starting dump at:", datetime.now())
-                        subscriber.modify_ack_deadline(subscription=sub_path, ack_ids=[msg.ack_id],ack_deadline_seconds=60)
-                        querys = strings.replace(b'\r',b'').split(b'\n')
-                        exec_query(querys)
-                        subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
-                        print("Finishing dump at:", datetime.now())
-                        print("Everithing is done, I'm going to sleep")
+                        try:
+                            move_file(bucket_name, msg.message.data, b"processed/"+msg.message.data)
+                        except Exception as e:
+                            print(e)
+                            print(f"Removing msg with error: failed to move {msg.message.data}")
+
             sleep(1)
-
-            
-
 
 
 
