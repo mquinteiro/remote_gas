@@ -34,7 +34,7 @@ def syncTable_strings(table="Telemedidas"):
     cursor = cnxn.cursor()
     cursor.execute("select * from " + table)
     first = True
-    columns = ' '.join([column[0] for column in cursor.description])
+    columns = ','.join([column[0] for column in cursor.description])
     for row in cursor.fetchall():
         query = "replace " + table + " ("+columns+")  values ("
         for i in range(0, len(row)):
