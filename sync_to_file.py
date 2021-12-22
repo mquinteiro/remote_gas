@@ -1,5 +1,6 @@
 #!/usr/bin/python3.5
 
+from time import sleep
 import pyodbc
 import os
 from subprocess import call
@@ -118,7 +119,7 @@ def main():
         #syncTable("DepositosAux") #jfp 7/3/19 Ya no Sincronzamo DAux 
         #ahora= datetime.datetime.now()
         #log.write ("Sync_DepositosAux: %s \r\n" %ahora)
-        
+        strings += syncTable_strings("DepositosAux")
         strings += syncTable_strings("Telemedidas")
         log.write (f"end Sync_Telemedidas: {datetime.datetime.now}\r\n")
         strings += syncLecuturas_strings(last_sync_date)
@@ -137,6 +138,7 @@ def main():
         #call(["/usr/sbin/vpnc-disconnect"])
         log.write (f"******** SYNC_FAILURE: {datetime.datetime.now}\r\n")
         log.close()
+        sleep(5)
 
 
 if __name__ == '__main__':
