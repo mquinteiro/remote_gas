@@ -94,7 +94,9 @@ def sync_telemedidas_strings(max_id):
     pyodbc.drivers()
     cnxn = pyodbc.connect(con_string)
     cursor = cnxn.cursor()
+    
     sql_query = "select Telemedidas.* from Telemedidas t, (select distinct key_data, from sync_updates where table_name='Telemedidas' and id<%s) s where t.NSerie=s.key_data" %max_id
+    print(sql_query)
     cursor.execute(sql_query)
     query = ""
     first = True
