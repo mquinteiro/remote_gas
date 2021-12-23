@@ -66,7 +66,7 @@ def sync_depositos_strings(max_id):
         if not first:
             query += ',('
         else:
-            "replace into DepositosAux (%s)values (" %columns
+            query = "replace into DepositosAux (%s)values (" %columns
             first = False
         # print(row)
         for i in range(0, len(row)):
@@ -105,7 +105,7 @@ def sync_telemedidas_strings(max_id):
         if not first:
             query += ',('
         else:
-            "replace into Telemedidas (%s)values (" %columns
+            query = "replace into Telemedidas (%s)values (" %columns
             first = False
         # print(row)
         for i in range(0, len(row)):
