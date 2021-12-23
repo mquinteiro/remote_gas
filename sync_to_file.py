@@ -181,7 +181,7 @@ def syncLecuturas_strings(fecha):
     #log.write ("getLastDate --> %s \r\n" %fecha)
     #log.write ("Query:-------------------------- \r\n %s \r\n" %query)
 
-def mark_sync_updates(mad_id, table_name):
+def mark_sync_updates(table_name, mad_id):
     pyodbc.drivers()
     cnxn = pyodbc.connect(con_string)
     cursor = cnxn.cursor()
