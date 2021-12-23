@@ -52,7 +52,7 @@ def syncTable_strings(table="Telemedidas"):
     return result_strings
 
 
-def sync_DepositosAux_strings(max_id):
+def sync_depositos_strings(max_id):
     result_strings = []
     pyodbc.drivers()
     cnxn = pyodbc.connect(con_string)
@@ -126,6 +126,15 @@ def sync_telemedidas_strings(max_id):
         result_strings.append(query)
     return result_strings
 
+
+def get_max_id(table, field='id'):
+    pyodbc.drivers()
+    cnxn = pyodbc.connect(con_string)
+    cursor = cnxn.cursor()
+    cursor.execute("select max(%s) from %s" %(field, table))
+    return cursor.fetchone()[0]
+
+
 def syncLecuturas_strings(fecha):
     updated=0
     result_strings = []
@@ -196,6 +205,9 @@ def main():
         #log.write ("Sync_DepositosAux: %s \r\n" %ahora)
         #strings += syncTable_strings("DepositosAux")
         #strings += syncTable_strings("Telemedidas")
+        max_id = get_max_id("sync_updates", "id")
+        strings += sync_telemedidas_strings(max_id)
+        strings += sync_depositos_strings(max_id)
         log.write (f"end Sync_Telemedidas: {datetime.datetime.now}\r\n")
         strings += syncLecuturas_strings(last_sync_date)
         log.write (f"end Sync_Lecturas: {datetime.datetime.now}\r\n")
