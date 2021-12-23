@@ -57,7 +57,7 @@ def sync_depositos_strings(max_id):
     pyodbc.drivers()
     cnxn = pyodbc.connect(con_string)
     cursor = cnxn.cursor()
-    sql_query = "select DepositosAux.* from DepositosAux t, (select distinct key_data, key2_data from sync_updates where table_name='DepositosAux' and id<%s) s where t.CCanalizado=s.key_data and t.CodDep=s.key2_data" %max_id
+    sql_query = "select t.* from DepositosAux t, (select distinct key_data, key2_data from sync_updates where table_name='DepositosAux' and id<%s) s where t.CCanalizado=s.key_data and t.CodDep=s.key2_data" %max_id
     cursor.execute(sql_query)
     query = ""
     first = True
@@ -216,9 +216,9 @@ def main():
         #strings += syncTable_strings("Telemedidas")
         max_id = get_max_id("sync_updates", "id")
         strings += sync_telemedidas_strings(max_id)
-        mark_sync_updates('Telemedidas', max_id)
+        
         strings += sync_depositos_strings(max_id)
-        mark_sync_updates('DepositosAux', max_id)
+        
         log.write (f"end Sync_Telemedidas: {datetime.datetime.now}\r\n")
         strings += syncLecuturas_strings(last_sync_date)
         log.write (f"end Sync_Lecturas: {datetime.datetime.now}\r\n")
@@ -229,6 +229,8 @@ def main():
         last_sync = open("last_sync.txt", "w")
         last_sync.write(str(ahora))
         last_sync.close()
+        mark_sync_updates('Telemedidas', max_id)
+        mark_sync_updates('DepositosAux', max_id)
         log.write (f"start gce upload: {datetime.datetime.now}\r\n")
         upload_gcs(file_name)
         log.write (f"***Sync_End: {datetime.datetime.now}\r\n")
