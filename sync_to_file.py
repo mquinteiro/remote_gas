@@ -179,6 +179,13 @@ def syncLecuturas_strings(fecha):
     #log.write ("getLastDate --> %s \r\n" %fecha)
     #log.write ("Query:-------------------------- \r\n %s \r\n" %query)
 
+def mark_sync_updates(mad_id, table_name):
+    pyodbc.drivers()
+    cnxn = pyodbc.connect(con_string)
+    cursor = cnxn.cursor()
+    cursor.execute("update sync_updates set processed=1 where table_name='%s' and id<=%s" %(table_name, mad_id))
+    cnxn.commit()
+
 def main():
     #call(["/usr/sbin/vpnc", "test"])
     log = open("gasSync.log", "a+")
@@ -207,7 +214,9 @@ def main():
         #strings += syncTable_strings("Telemedidas")
         max_id = get_max_id("sync_updates", "id")
         strings += sync_telemedidas_strings(max_id)
+        mark_sync_updates('Telemedidas', max_id)
         strings += sync_depositos_strings(max_id)
+        mark_sync_updates('DepositosAux', max_id)
         log.write (f"end Sync_Telemedidas: {datetime.datetime.now}\r\n")
         strings += syncLecuturas_strings(last_sync_date)
         log.write (f"end Sync_Lecturas: {datetime.datetime.now}\r\n")
