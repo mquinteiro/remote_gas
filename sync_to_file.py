@@ -52,6 +52,80 @@ def syncTable_strings(table="Telemedidas"):
     return result_strings
 
 
+def sync_DepositosAux_strings(max_id):
+    result_strings = []
+    pyodbc.drivers()
+    cnxn = pyodbc.connect(con_string)
+    cursor = cnxn.cursor()
+    sql_query = "select DepositosAux.* from DepositosAux t, (select distinct key_data, key2_data from sync_updates where table_name='DepositosAux' and id<%s) s where t.CCanalizado=s.key_data and t.CodDep=s.key2_data" %max_id
+    cursor.execute(sql_query)
+    query = ""
+    first = True
+    columns = ','.join([column[0].split('.')[-1] for column in cursor.description])
+    for row in cursor.fetchall():
+        if not first:
+            query += ',('
+        else:
+            "replace into DepositosAux (%s)values (" %columns
+            first = False
+        # print(row)
+        for i in range(0, len(row)):
+            if i > 0:
+                query += ','
+            if isinstance(row[i], numbers.Number):
+                query += str(row[i])
+            elif type(row[i]) is datetime.datetime:
+                query += "'" + row[i].strftime("%Y-%m-%d %H:%M:%S") + "'"
+            elif type(row[i]) is datetime.date:
+                query += row[i]
+            elif row[i] is not None:
+                query += '"' + row[i] + '"'
+            else:
+                query += "NULL"
+        query += ')'
+        #print(query)
+    if query:
+        query += ';'
+        result_strings.append(query)
+    return result_strings
+
+def sync_telemedidas_strings(max_id):
+    result_strings = []
+    pyodbc.drivers()
+    cnxn = pyodbc.connect(con_string)
+    cursor = cnxn.cursor()
+    sql_query = "select Telemedidas.* from Telemedidas t, (select distinct key_data, from sync_updates where table_name='Telemedidas' and id<%s) s where t.NSerie=s.key_data" %max_id
+    cursor.execute(sql_query)
+    query = ""
+    first = True
+    columns = ','.join([column[0].split('.')[-1] for column in cursor.description])
+    for row in cursor.fetchall():
+        if not first:
+            query += ',('
+        else:
+            "replace into Telemedidas (%s)values (" %columns
+            first = False
+        # print(row)
+        for i in range(0, len(row)):
+            if i > 0:
+                query += ','
+            if isinstance(row[i], numbers.Number):
+                query += str(row[i])
+            elif type(row[i]) is datetime.datetime:
+                query += "'" + row[i].strftime("%Y-%m-%d %H:%M:%S") + "'"
+            elif type(row[i]) is datetime.date:
+                query += row[i]
+            elif row[i] is not None:
+                query += '"' + row[i] + '"'
+            else:
+                query += "NULL"
+        query += ')'
+        #print(query)
+    if query:
+        query += ';'
+        result_strings.append(query)
+    return result_strings
+
 def syncLecuturas_strings(fecha):
     updated=0
     result_strings = []
