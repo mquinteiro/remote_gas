@@ -219,7 +219,6 @@ def main():
         # strings += syncTable_strings("Telemedidas")
         max_id = get_max_id("sync_updates", "id")
         strings += sync_telemedidas_strings(max_id)
-        mark_sync_updates('Telemedidas', max_id)
         strings += sync_depositos_strings(max_id)
         
         log.write(f"end Sync_Telemedidas: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
@@ -229,14 +228,21 @@ def main():
         with open(file_name, 'w') as f:
             for item in strings:
                 f.write("%s\r\n" % item)
-        last_sync = open("last_sync.txt", "w")
-        last_sync.write(str(ahora))
-        last_sync.close()
-        mark_sync_updates('Telemedidas', max_id)
-        mark_sync_updates('DepositosAux', max_id)
+                log.write("%s\r\n" % item)
+
         log.write(f"start gce upload: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
         upload_gcs(file_name)
         log.write(f"***Sync_End: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
+        # Mark as processed at the end, and then move to processed folder
+        mark_sync_updates('Telemedidas', max_id)
+        mark_sync_updates('DepositosAux', max_id)
+        os.rename(file_name, "processed/" + file_name)
+
+        last_sync = open("last_sync.txt", "w")
+        last_sync.write(str(ahora))
+        last_sync.close()
+        log.close()
+
     finally:
         # call(["/usr/sbin/vpnc-disconnect"])
         log.write(f"******** SYNC_FAILURE: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
