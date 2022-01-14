@@ -206,7 +206,7 @@ def main():
         file_name = ahora.strftime("%Y%m%d%H%M%S_cepsa_update.txt") 
         print(file_name)
         
-        log.write (f"***Sync_Inicio: {datetime.datetime.now}\r\n")
+        log.write (f"***Sync_Inicio: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
         #syncTable("DepositosAux") #jfp 7/3/19 Ya no Sincronzamo DAux 
         #ahora= datetime.datetime.now()
         #log.write ("Sync_DepositosAux: %s \r\n" %ahora)
@@ -217,9 +217,9 @@ def main():
         mark_sync_updates('Telemedidas', max_id)
         strings += sync_depositos_strings(max_id)
         mark_sync_updates('DepositosAux', max_id)
-        log.write (f"end Sync_Telemedidas: {datetime.datetime.now}\r\n")
+        log.write (f"end Sync_Telemedidas: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
         strings += syncLecuturas_strings(last_sync_date)
-        log.write (f"end Sync_Lecturas: {datetime.datetime.now}\r\n")
+        log.write (f"end Sync_Lecturas: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
         
         with open(file_name, 'w') as f:
             for item in strings:
@@ -227,12 +227,12 @@ def main():
         last_sync = open("last_sync.txt", "w")
         last_sync.write(str(ahora))
         last_sync.close()
-        log.write (f"start gce upload: {datetime.datetime.now}\r\n")
+        log.write (f"start gce upload: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
         upload_gcs(file_name)
-        log.write (f"***Sync_End: {datetime.datetime.now}\r\n")
+        log.write (f"***Sync_End: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
     finally:
         #call(["/usr/sbin/vpnc-disconnect"])
-        log.write (f"******** SYNC_FAILURE: {datetime.datetime.now}\r\n")
+        log.write (f"******** SYNC_FAILURE: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
         log.close()
         sleep(5)
 

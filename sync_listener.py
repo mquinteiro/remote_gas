@@ -7,6 +7,7 @@ import MySQLdb as mdb
 
 subscription_name = 'projects/mquinteiro/topics/cepsa_sync'
 
+
 # Connect to mysql, start transaction, execute the querys in the string, commit and close connection
 def exec_query(queries):
     db = mdb.connect(host=cic_host, user=cic_user, passwd=cic_pass, db=cic_database)
@@ -16,6 +17,7 @@ def exec_query(queries):
         if query:
             cur.execute(query)
     db.commit()
+
 
 # Instantiates a client and wait for pubsub events
 def main():
@@ -38,15 +40,17 @@ def main():
                         if not strings:
                             subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
                             print("Removing msg without file")
-                            raise Exception(f"Empty file: {msg.message.data}")
+                            move_file(bucket_name, msg.message.data, "empty/" + msg.message.data)
+                            continue
                         else:
                             print("Starting dump at:", datetime.now())
                             subscriber.modify_ack_deadline(subscription=sub_path, ack_ids=[msg.ack_id],ack_deadline_seconds=60)
                             querys = strings.replace(b'\r',b'').split(b'\n')
                             exec_query(querys)
                             subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
+                            move_file(bucket_name, msg.message.data, b"processed/" + msg.message.data)
                             print("Finishing dump at:", datetime.now())
-                            print("Everithing is done, I'm going to sleep")
+
                     except Exception as e:
                         print(e)
                         subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
@@ -56,15 +60,8 @@ def main():
                         except Exception as e:
                             print(e)
                             print(f"Failed to move error {msg.message.data} file to error folder")
-                    else:
-                        try:
-                            move_file(bucket_name, msg.message.data, b"processed/"+msg.message.data)
-                        except Exception as e:
-                            print(e)
-                            print(f"Removing msg with error: failed to move {msg.message.data}")
-
+                print("Everithing is done, I'm going to sleep")
             sleep(1)
-
 
 
 if __name__ == '__main__':

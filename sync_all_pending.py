@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     bucket_name = 'cepsa_shares'
     names = []
-    for blob in client.list_blobs(bucket_name, prefix='2021'):
+    for blob in client.list_blobs(bucket_name, prefix='2022'):
         names.append(blob.name)
         names.sort()
     for name in names:
@@ -26,8 +26,9 @@ if __name__ == '__main__':
             querys = strings.replace(b'\r', b'').split(b'\n')
             try:
                 exec_query(querys)
-            except :
-                print(querys)
-                exit(1)
-            print("Finishing dump at:", datetime.now())
-            move_file(bucket_name, name,  "processed/"+name)
+                print("Finishing dump at:", datetime.now())
+                move_file(bucket_name, name,  "processed/"+name)
+            except Exception as e:
+                move_file(bucket_name, name,  "errors/"+name)
+        else:
+            move_file(bucket_name, name,  "empty/"+name)
