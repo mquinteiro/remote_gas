@@ -24,7 +24,7 @@ def upload_gcs(file_name):
     publisher.publish(topic, file_name.encode('utf-8')).result()
 
 
-def syncTable_strings(table="Telemedidas"):
+def sync_table_strings(table="Telemedidas"):
     result_strings = [f"delete from {table};"]
     pyodbc.drivers()
     cnxn = pyodbc.connect(con_string)
@@ -64,7 +64,7 @@ def sync_depositos_strings(max_id):
         if not first:
             query += ',('
         else:
-            query = "replace into DepositosAux (%s)values (" %columns
+            query = f"replace into DepositosAux ({columns})values ("
             first = False
         # print(row)
         for i in range(0, len(row)):
@@ -134,11 +134,11 @@ def get_max_id(table, field='id'):
     pyodbc.drivers()
     cnxn = pyodbc.connect(con_string)
     cursor = cnxn.cursor()
-    cursor.execute("select max(%s) from %s" %(field, table))
+    cursor.execute(f"select max({field}) from {table}")
     return cursor.fetchone()[0]
 
 
-def syncLecuturas_strings(fecha):
+def sync_lecuturas_strings(fecha):
     updated = 0
     result_strings = []
     pyodbc.drivers()
@@ -187,8 +187,9 @@ def mark_sync_updates(table_name, mad_id):
     pyodbc.drivers()
     cnxn = pyodbc.connect(con_string)
     cursor = cnxn.cursor()
-    cursor.execute("update sync_updates set processed=1 where table_name='%s' and id<=%s" %(table_name, mad_id))
+    cursor.execute(f"update sync_updates set processed=1 where table_name='{table_name}' and id<={mad_id}")
     cnxn.commit()
+
 
 def main():
     # call(["/usr/sbin/vpnc", "test"])
@@ -201,7 +202,7 @@ def main():
         if last_sync_date:
             last_sync_date = datetime.datetime.strptime(last_sync_date, "%Y-%m-%d %H:%M:%S.%f")
         else:
-            last_sync_date = datetime.datetime(2021, 5, 12 ,10, 43, 27) 
+            last_sync_date = datetime.datetime(2021, 5, 12, 10, 43, 27)
 
         print(last_sync_date)
 
@@ -222,7 +223,7 @@ def main():
         strings += sync_depositos_strings(max_id)
         
         log.write(f"end Sync_Telemedidas: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
-        strings += syncLecuturas_strings(last_sync_date)
+        strings += sync_lecuturas_strings(last_sync_date)
         log.write(f"end Sync_Lecturas: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\r\n")
         
         with open(file_name, 'w') as f:
