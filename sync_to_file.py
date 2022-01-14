@@ -85,6 +85,7 @@ def sync_depositos_strings(max_id):
     if query:
         query += ';'
         result_strings.append(query)
+        log.write(query + '\r\n')
     return result_strings
 
 
@@ -193,7 +194,7 @@ def mark_sync_updates(table_name, mad_id):
 
 def main():
     # call(["/usr/sbin/vpnc", "test"])
-    log = open("gasSync.log", "a+")
+
     try:
         last_sync_date = None
         if os.path.exists("last_sync.txt"):
@@ -241,7 +242,6 @@ def main():
         last_sync = open("last_sync.txt", "w")
         last_sync.write(str(ahora))
         last_sync.close()
-        log.close()
 
     finally:
         # call(["/usr/sbin/vpnc-disconnect"])
@@ -251,4 +251,5 @@ def main():
 
 
 if __name__ == '__main__':
+    log = open("gasSync.log", "a+")
     main()
