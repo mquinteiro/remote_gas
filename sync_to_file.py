@@ -54,7 +54,7 @@ def sync_depositos_strings(max_id):
     cnxn = pyodbc.connect(con_string)
     cursor = cnxn.cursor()
     sql_query = f"select t.* from DepositosAux t, (select distinct key_data, key2_data from sync_updates where " \
-                f"table_name='DepositosAux' and id<{max_id} and processed=0) s where t.CCanalizado=s.key_data and " \
+                f"table_name='DepositosAux' and id<={max_id} and processed=0) s where t.CCanalizado=s.key_data and " \
                 f"t.CodDep=s.key2_data" 
     cursor.execute(sql_query)
     query = ""
@@ -96,7 +96,7 @@ def sync_telemedidas_strings(max_id):
     cursor = cnxn.cursor()
     
     sql_query = f"select t.* from Telemedidas t, (select distinct key_data from sync_updates " \
-                f"where table_name='Telemedidas' and id<{max_id} and processed=0) s " \
+                f"where table_name='Telemedidas' and id<={max_id} and processed=0) s " \
                 f"where t.NSerial=s.key_data"
     print(sql_query)
     cursor.execute(sql_query)
