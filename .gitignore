@@ -2,3 +2,6 @@ cep_credentials.py
 mquinteiro-8ef43ab73aee.json
 *.log
 nohup.out
+process/
+2022*
+__pycache__/
