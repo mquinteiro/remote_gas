@@ -19,7 +19,6 @@ from generate_sap_linux import linux_connect
 
 fields_in_Telemedidas = ['NSerial', 'CodigoSAPTel', 'CCanalizado', 'Telefono', 'Deposito1', 'CodDep1', 'Volumen1',
                          'Deposito2', 'CodDep2', 'Volumen2', 'Deposito3', 'CodDep3', 'Volumen3', 'Status']
-fields_in_Telemedidas = ['NSerial', 'CodigoSAPTel', 'CCanalizado', 'Telefono']
 fields_for_Telemedidas = fields_in_Telemedidas
 
 # field for Canalizados  (Codigo, Nombre, Localidad, CodPostal, Agencia, Transportista, Mantenedor, Status)
@@ -55,17 +54,35 @@ def main():
     sql_str = 'delete from Canalizados'
     cur.execute(sql_str)
     for key in data.keys():
-        sql_str = f"insert into Telemedidas_SAP ({','.join(['%s'] * len(fields_in_Telemedidas))}) values "
+        sql_str = f"insert into Telemedidas_SAP ({','.join(fields_in_Telemedidas)}) values "
         sql_str += f"({','.join(['%s'] * len(fields_for_Telemedidas))})"
-        fields = fields_for_Telemedidas + [data[key][field] for field in fields_for_Telemedidas]
+        fields = tuple([data[key][field] for field in fields_for_Telemedidas])
         cur.execute(sql_str, fields)
-        sql_str = f"insert into Canalizados ({','.join(['?'] * len(fields_in_Canalizados))}) values "
-        sql_str += f"({','.join(['?'] * len(fields_for_Canalizados))})"
-        cur.execute(sql_str, *(fields_for_Canalizados + [data[key][field] for field in fields_for_Canalizados]))
+        sql_str = f"insert into Canalizados ({','.join(fields_in_Canalizados)}) values "
+        sql_str += f"({','.join(['%s'] * len(fields_for_Canalizados))})"
+        fields = tuple([data[key][field] for field in fields_for_Canalizados])
+        try:
+            cur.execute(sql_str,tuple(fields))
+        except:
+            print("Error in row: ", data[key]['CCanalizado'])
+            continue
+    # con.rollback() 
     con.commit()
         
 
     print(data)
+
+# Validations for all Canalizado in CanalizadoAux with proveedor = '0'
+#
+# 1. Check that Telefono and CCanalizado in Lecturas is the same than in Telemedidas_SAP Telefono and CCanalizado
+
+def validations():
+    select_aux = "select CCanalizado,   from CanalizadoAux where Proveedor = '0'"
+    select_Telemedidas_SAP = "select CCanalizado, Telefono from Telemedidas_SAP where CCanalizado in (select CCanalizado from CanalizadoAux where Proveedor = '0')"
+    select_Telemedidas = "select CCanalizado, Telefono from Telemedidas where CCanalizado in (select CCanalizado from CanalizadoAux where Proveedor = '0')"
+    composed = "select ts.CCanalizado, ts.Telefono, ts.NSerial, t.CCanalizado, t.telefono, t.NSerial from Telemedidas_SAP ts inner join Telemedidas t on ts.CCanalizado = t.CCanalizado where ts.CCanalizado in (select CCanalizado from CanalizadoAux where Proveedor = '0') and (t.NSerial != ts.NSerial or ts.Telefono != t.Telefono)"
+  
+
 
 if __name__ == "__main__":
     main()

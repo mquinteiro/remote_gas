@@ -8,7 +8,6 @@
 from cep_credentials import con_string, gce_cert_json_name
 from time import sleep
 from datetime import datetime
-import pyodbc
 import os
 
 from cep_credentials import gce_cert_json_name, cic_host, cic_user, cic_pass, cic_database
