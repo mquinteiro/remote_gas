@@ -40,7 +40,7 @@ def main():
                         if not strings:
                             subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
                             print("Removing msg without file")
-                            move_file(bucket_name, msg.message.data, "empty/" + msg.message.data)
+                            move_file(bucket_name, msg.message.data, b"empty/" + msg.message.data)
                             continue
                         else:
                             print("Starting dump at:", datetime.now())
@@ -56,7 +56,7 @@ def main():
                         subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
                         print(f"Removing msg with error: failed to process {msg.message.data}")
                         try:
-                            move_file(bucket_name, msg.message.data, "error/"+msg.message.data)
+                            move_file(bucket_name, msg.message.data, b"error/"+msg.message.data)
                         except Exception as e:
                             print(e)
                             print(f"Failed to move error {msg.message.data} file to error folder")

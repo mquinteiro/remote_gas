@@ -28,11 +28,11 @@ fields_for_Canalizados = ['CCanalizado', 'Nombre', 'Localidad', 'CodPostal', 'Ag
 
 def loadCSVFile(filename):
     f = open(filename, 'r', encoding='ISO-8859-1')
-    field_names = ['NSerial', 'Telefono', 'CodigoSAPTel', 'CCanalizado', 'Nombre', 'Localidad', 'CodPostal', 'Agencia', 
+    SAP_field_names = ['NSerial', 'Telefono', 'CodigoSAPTel', 'CCanalizado', 'Nombre', 'Localidad', 'CodPostal', 'Agencia', 
         'Transportista', 'Mantenedor', 'Status', 'E1', 'CodDep1', 'Volumen1', 'Deposito1', 
         'CodDep2', 'Volumen2', 'Deposito2', 'CodDep3', 'Volumen3', 'Deposito3']
     
-    reader = csv.DictReader(f, field_names,delimiter='|', )
+    reader = csv.DictReader(f, SAP_field_names,delimiter='|', )
     data = {}
     for row in reader:
         if row['Deposito3'] is None:
@@ -64,7 +64,7 @@ def main():
         try:
             cur.execute(sql_str,tuple(fields))
         except:
-            print("Error in row: ", data[key]['CCanalizado'])
+            print("Warning, more than one telemedida in the Canalizado, using first canalizado data: ", data[key]['CCanalizado'])
             continue
     # con.rollback() 
     con.commit()
