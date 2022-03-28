@@ -5,9 +5,10 @@
 
 
 
+from builtins import delattr
 from cep_credentials import con_string, gce_cert_json_name
 from time import sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 from cep_credentials import gce_cert_json_name, cic_host, cic_user, cic_pass, cic_database
@@ -53,14 +54,17 @@ def set_last_sync(last_sync=datetime.now()):
 def main():
     last_sync = get_last_sync()
     last_date = datetime.strftime(last_sync, '%Y-%m-%d %H:%M:%S')
+    file_name = f"Lecturas_{datetime.strftime(datetime.now(),'%H%M%d%m%Y')}_prg.txt"
     print(f"Last sync: {last_date}")
+    end_date = datetime.now()
+    end_date = datetime(2022,3,28,6,55)  # temporal para forzar desde ayer.
     result_strings = gen_lecturas_strings(last_date)
     print(f"{len(result_strings)} lines")
     if result_strings:
-        with open('lecturas_l.txt', 'w') as f:
+        with open(file_name, 'w') as f:
             for line in result_strings:
                 f.write(line + '\n')
-        # set_last_sync(last_date)
+        set_last_sync(end_date)
 
 if __name__ == '__main__':
     main()
