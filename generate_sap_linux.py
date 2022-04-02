@@ -6,13 +6,51 @@
 
 
 from builtins import delattr
+from distutils.file_util import move_file
+import shutil
 from cep_credentials import con_string, gce_cert_json_name
+from cep_credentials import sftp_dev_password, sftp_dev_user, sftp_pro_password, sftp_pro_user, sftp_host
 from time import sleep
 from datetime import datetime, timedelta
 import os
-
+import pysftp
 from cep_credentials import gce_cert_json_name, cic_host, cic_user, cic_pass, cic_database
 import MySQLdb as mdb
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE, formatdate
+from os.path import basename
+import smtplib
+
+support_team = ['mquinteiro@cic-systems.com', 'jesus.martinez@cic-systems.com']
+
+def sendEmailData(fromaddr, toaddrs, files,subj="", body=""):
+    msg = MIMEMultipart()
+    msg['From'] = fromaddr
+    msg['To'] = ', '.join(toaddrs)
+    msg['Date'] = formatdate(localtime=True)
+    if(subj==""):
+        msg['Subject'] = "Canalizados "
+    else:
+        msg['Subject'] = subj
+    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText("Canalizados "))
+    for f in files or []:
+        with open(f, "rb") as fil:
+            part = MIMEApplication(
+                fil.read(),
+                Name=basename(f)
+            )
+        # After the file is closed
+        part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
+        msg.attach(part)
+    server = smtplib.SMTP("192.168.65.41")
+    # server = smtplib.SMTP("mail.cic-systems.com")
+    # server.set_debuglevel(1)
+    server.send_message(msg)
+    server.quit()
+
 
 def linux_connect():
     db = mdb.connect(host=cic_host, user=cic_user, passwd=cic_pass, db=cic_database)
@@ -55,16 +93,50 @@ def main():
     last_sync = get_last_sync()
     last_date = datetime.strftime(last_sync, '%Y-%m-%d %H:%M:%S')
     file_name = f"Lecturas_{datetime.strftime(datetime.now(),'%H%M%d%m%Y')}_prg.txt"
+    temp_file_name = f"Lecturas_{datetime.strftime(datetime.now(),'%H%M%d%m%Y')}_prg.tmp"
     print(f"Last sync: {last_date}")
     end_date = datetime.now()
-    end_date = datetime(2022,3,28,6,55)  # temporal para forzar desde ayer.
+    # end_date = datetime(2022,4,28,6,55)  # temporal para forzar desde ayer.
     result_strings = gen_lecturas_strings(last_date)
     print(f"{len(result_strings)} lines")
-    if result_strings:
-        with open(file_name, 'w') as f:
-            for line in result_strings:
-                f.write(line + '\n')
-        set_last_sync(end_date)
+    success = False
+    # try to upload to the sftp, if it fails, send email to the support team.
+    try:
+        if result_strings:
+            with open(file_name, 'w') as f:
+                for line in result_strings:
+                    f.write(line + '\n')
+            # save to sftp server at /prod dir with temp file name and then rename to final file name
+            with pysftp.Connection(sftp_host, username=sftp_dev_user, password=sftp_dev_password) as sftp:
+                sftp.cwd('pro')
+                sftp.put(file_name, temp_file_name)
+                sftp.rename(temp_file_name, file_name)
+            # if nothing breaks, set last sync to now
+            set_last_sync(end_date)
+            success = True
+            
+    except Exception as e:
+        print(e)
+        # send email to the support team
+        sendEmailData('mquinteiro@cic-systems.com', support_team, [file_name], subj="Error enviando GAISB", 
+                        body=f"Error uploading to sftp:\n {e}")
+    # temporal, send email to the support team
+    if success:
+        sendEmailData('mquinteiro@cic-systems.com', support_team, [file_name], subj="Envio Correcto SAP GASIB",
+                    body="Envio Correcto, dejar de enviar esto en un tiempo, solo para comprobación")
+        # if processed dir do not exists, create it
+        if not os.path.exists('./processed'):
+            os.makedirs('./processed')
+        # move the file to the processed dir
+        
+        move_file(file_name,"./processed/")
+    else:
+        # if errors dir do not exists, create it
+        if not os.path.exists('./errors'):
+            os.makedirs('./errors')
+        # move the file to the processed dir
+        move_file(file_name,"./errors/")
+    
 
 if __name__ == '__main__':
     main()
