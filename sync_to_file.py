@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 
 from time import sleep
 import pyodbc
@@ -221,7 +221,7 @@ def main():
         # ahora= datetime.datetime.now()
         # log.write ("Sync_DepositosAux: %s \r\n" %ahora)
         # strings += syncTable_strings("DepositosAux")
-        # strings += syncTable_strings("Telemedidas")
+        strings += sync_table_strings("Terminales")
         max_id = get_max_id("sync_updates", "id")
         strings += sync_telemedidas_strings(max_id)
         strings += sync_depositos_strings(max_id)
