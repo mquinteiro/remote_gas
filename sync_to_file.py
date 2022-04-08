@@ -36,8 +36,12 @@ def sync_table_strings(table="Telemedidas"):
         for i in range(0, len(row)):
             if i > 0:
                 query += ','
-            if type(row[i]) is int:
+            if isinstance(row[i], numbers.Number):
                 query += str(row[i])
+            elif type(row[i]) is datetime.datetime:
+                query += "'" + row[i].strftime("%Y-%m-%d %H:%M:%S") + "'"
+            elif type(row[i]) is datetime.date:
+                query += row[i]
             elif row[i] is not None:
                 query += '"' + row[i].replace('"', '\\"') + '"'
             else:
