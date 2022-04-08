@@ -5,7 +5,8 @@ import chunk
 from curses import keyname
 from curses.ascii import isalnum
 from ntpath import join
-from cep_credentials import con_string, sap_csv_file
+from cep_credentials import con_string, sftp_host, sftp_pro_user, sftp_pro_password
+import pysftp
 from time import sleep
 from datetime import datetime
 import pyodbc
@@ -50,8 +51,18 @@ def loadCSVFile(filename):
 
     return data
 
+# to get the file telemedidas.txt from sftp server, dat directory and save it as filename
+
+def getSAPFile(filename):
+    sftp = pysftp.Connection(host=sftp_host, username=sftp_pro_user, password=sftp_pro_password)
+    sftp.get('dat/Telemedidas.txt', filename)
+    sftp.close()
+
 def main():
-    data = loadCSVFile(sap_csv_file)
+    today = datetime.now().strftime('%Y%m%d%H%M%S')
+    sap_f_name = f'telemedidas_{today}.txt'
+    getSAPFile(sap_f_name)
+    data = loadCSVFile(sap_f_name)
     cur, con  = linux_connect()
     cur.execute("set names 'utf8'")
     cur.execute("set CHARACTER set  'utf8'")
@@ -103,9 +114,10 @@ def validations():
     select_aux = "select CCanalizado,   from CanalizadoAux where Proveedor = '0'"
     select_Telemedidas_SAP = "select CCanalizado, Telefono from Telemedidas_SAP where CCanalizado in (select CCanalizado from CanalizadoAux where Proveedor = '0')"
     select_Telemedidas = "select CCanalizado, Telefono from Telemedidas where CCanalizado in (select CCanalizado from CanalizadoAux where Proveedor = '0')"
-    composed = "select ts.CCanalizado, ts.Telefono, ts.NSerial, t.CCanalizado, t.telefono, t.NSerial from Telemedidas_SAP ts inner join Telemedidas t on ts.CCanalizado = t.CCanalizado where ts.CCanalizado in (select CCanalizado from CanalizadoAux where Proveedor = '0') and (t.NSerial != ts.NSerial or ts.Telefono != t.Telefono)"
+    composed = "select ts.CCanalizado, ts.Telefono, ts.NSerial, t.CCanalizado, t.telefono, t.NSerial from Telemedidas_SAP ts inner join Telemedidas t on ts.CCanalizado = t.CCanalizado where ts.CCanalizado in (select CCanalizado from DepositosAux where Proveedor = '0') and (t.NSerial != ts.NSerial or ts.Telefono != t.Telefono)"
   
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    validations()
