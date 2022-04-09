@@ -25,7 +25,7 @@ def upload_gcs(file_name):
 
 
 def sync_table_strings(table="Telemedidas"):
-    result_strings = [f"delete from {table};"]
+    result_strings = [f"delete from {table}@ENDCOMAND@"]
     pyodbc.drivers()
     cnxn = pyodbc.connect(con_string)
     cursor = cnxn.cursor()
@@ -46,7 +46,7 @@ def sync_table_strings(table="Telemedidas"):
                 query += '"' + row[i].replace('"', '\\"') + '"'
             else:
                 query += "NULL"
-        query += ');'
+        query += ')@ENDCOMAND@'
         # print(query)
         result_strings.append(query)
     return result_strings
@@ -87,7 +87,7 @@ def sync_depositos_strings(max_id):
         query += ')'
         # print(query)
     if query:
-        query += ';'
+        query += '@ENDCOMAND@'
         result_strings.append(query)
         log.write(query + '\r\n')
     return result_strings
@@ -130,7 +130,7 @@ def sync_telemedidas_strings(max_id):
         query += ')'
         # print(query)
     if query:
-        query += ';'
+        query += '@ENDCOMAND@'
         result_strings.append(query)
     return result_strings
 
@@ -180,7 +180,7 @@ def sync_lecuturas_strings(fecha):
         updated += 1
     print("Numero de registros modificados = ", updated)
     if updated > 0:
-        query += ';'
+        query += '@ENDCOMAND@'
         result_strings.append(query)
     return result_strings
     # log = open("query01.log", "a+")
