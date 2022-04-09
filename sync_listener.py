@@ -4,18 +4,28 @@ from google.cloud import pubsub_v1
 from time import sleep
 from cep_credentials import gce_cert_json_name, cic_host, cic_user, cic_pass, cic_database
 import MySQLdb as mdb
-
+import re
 subscription_name = 'projects/mquinteiro/topics/cepsa_sync'
 
 
 # Connect to mysql, start transaction, execute the querys in the string, commit and close connection
-def exec_query(queries):
+def exec_query(strings):
     db = mdb.connect(host=cic_host, user=cic_user, passwd=cic_pass, db=cic_database)
     cur = db.cursor()
+    #cur.execute("DELIMITER @ENDCOMAND@")
     cur.auto_commit = False
+    s = strings.replace('delete from Terminales;\r\r\n','delete from Terminales@ENDCOMAND@')
+    s2 = re.sub('\);\r+\n*',')@ENDCOMAND@',s)
+    queries = s2.split('@ENDCOMAND@')
     for query in queries:
         if query:
-            cur.execute(query)
+            try:
+                cur.execute(query)
+            except Exception as e:
+                print(e)
+                print(f"Error in query: {query}")
+                exit(-1)
+    #cur.execute("DELIMITER ;")
     db.commit()
 
 
@@ -34,7 +44,7 @@ def main():
                     print("Received message for file:", msg.message.data)
                     names.append(msg.message.data)
                     try:
-                        strings = dowload_strings(bucket_name, msg.message.data)
+                        strings = dowload_strings(bucket_name, msg.message.data).decode('ISO-8859-1')
                         # print(strings)
                         # todo dowload file form cloud and execute mysqldump with it.
                         if not strings:
@@ -45,8 +55,7 @@ def main():
                         else:
                             print("Starting dump at:", datetime.now())
                             subscriber.modify_ack_deadline(subscription=sub_path, ack_ids=[msg.ack_id],ack_deadline_seconds=60)
-                            querys = strings.replace(b'\r',b'').split(b'\n')
-                            exec_query(querys)
+                            exec_query(strings)
                             subscriber.acknowledge(subscription=sub_path, ack_ids=[msg.ack_id])
                             move_file(bucket_name, msg.message.data, b"processed/" + msg.message.data)
                             print("Finishing dump at:", datetime.now())

@@ -16,7 +16,7 @@ if __name__ == '__main__':
     names = []
     for blob in client.list_blobs(bucket_name, prefix='2022'):
         names.append(blob.name)
-        names.sort()
+    names.sort()
     for name in names:
         print(name)
         # continue
