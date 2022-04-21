@@ -1,5 +1,6 @@
 from sys import stdout
 from google.cloud import pubsub
+from google.api_core.exceptions import AlreadyExists
 from time import sleep
 from cep_credentials import con_string, gce_cert_json_name
 
@@ -19,6 +20,21 @@ with pubsub.SubscriberClient.from_service_account_json(gce_cert_json_name) as su
         stdout.flush()
         message.ack()
     # result = subscriber.subscribe(subscription_path1, callback=callback).result()
+    try:
+        subscriber.create_subscription(name=subscription_path2, topic=topic)
+    except AlreadyExists:
+        pass
+    except Exception as e:
+        print(e)
+        exit(-1)
+    try:
+        subscriber.create_subscription(name=subscription_path1, topic=topic)
+    except AlreadyExists:
+        pass
+    except Exception as e:
+        print(e)
+        exit(-1)
+        
     subscriber.subscribe(subscription_path1, callback=callback)
     result = subscriber.subscribe(subscription_path2, callback=callback2)
     print(result)
