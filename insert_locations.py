@@ -6,7 +6,6 @@ from sigfox_api.api_tests import get_coverage
 from time import sleep
 
 dir = 'JARDINES DE GODOY,VILLAVICIOSA DE ODON 28670, Spain'
-key = 'AIzaSyBkhwHKkW8sFhlYFSNgjo_gCE8cWpovBg0'
 
 gmaps = gm.Client(key=key)
 #loc = gmaps.geocode(dir)
@@ -40,7 +39,7 @@ def get_theoric_signal(cod_canalizado):
 
 if __name__ == '__main__':
     sql = "select DISTINCT c.Codigo, c.Nombre, c.Localidad, c.CodPostal , ts.CCanalizado, ts.NSerial from Canalizados c," \
-            " Telemedidas_SAP ts, Terminales t where t.deGasNatural =0 and if(right (t.Codigo,1)>='A',LEFT (t.Codigo,LENGTH (t.Codigo)-1)" \
+            " Telemedidas_SAP ts, Terminales t where t.deGasNatural =0 and if(right (t.Codigo,1)>='A',LEFT (t.Codigo,LENGTH (t.Codigo)-1) " \
             ",t.Codigo ) = ts.CCanalizado  and ts.CCanalizado = c.Codigo and (ts.BajaTemporal is null or ts.BajaTemporal =0)" \
             " order by c.Codigo ;"
 
