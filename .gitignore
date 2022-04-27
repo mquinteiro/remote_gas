@@ -11,3 +11,5 @@ Telemedidas.txt
 2021*.txt
 launch.json
 *.pyc
+credentials.py
+BoardingPass.pdf
