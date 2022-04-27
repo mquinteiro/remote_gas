@@ -7,7 +7,7 @@ from time import sleep
 
 dir = 'JARDINES DE GODOY,VILLAVICIOSA DE ODON 28670, Spain'
 
-gmaps = gm.Client(key=key)
+gmaps = gm.Client(key=google_maps_key)
 #loc = gmaps.geocode(dir)
 
 
