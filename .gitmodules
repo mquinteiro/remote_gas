@@ -1,0 +1,3 @@
+[submodule "sigfox_api"]
+	path = sigfox_api
+	url = apolo:/git/sigfox_api
