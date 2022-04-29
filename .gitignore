@@ -8,3 +8,11 @@ __pycache__/
 enviados_*
 Lecturas_*
 telemedidas_20*
+Lecturas_*.txt
+lectu*.txt
+Telemedidas.txt
+2021*.txt
+launch.json
+*.pyc
+credentials.py
+BoardingPass.pdf
