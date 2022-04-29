@@ -5,3 +5,6 @@ nohup.out
 process/
 2022*
 __pycache__/
+enviados_*
+Lecturas_*
+telemedidas_20*

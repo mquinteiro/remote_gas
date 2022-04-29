@@ -1,0 +1,7 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# mqa ignre
+Lecturas_*.txt
+telemedidas_*.txt

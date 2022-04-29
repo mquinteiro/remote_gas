@@ -196,6 +196,26 @@ def mark_sync_updates(table_name, mad_id):
     cnxn.commit()
 
 
+# Upload to GCS all files in the trf directory and then move them to the directory trf/transfered/.
+# check if the dir exists and if not create it
+def transfers_to_gcs(bucket_name):
+    # bucket_name = 'trf-bucket'
+    if not os.path.exists('trf'):
+        os.mkdir('trf')
+    if not os.path.exists('trf/transfered'):
+        os.mkdir('trf/transfered')
+    for file in os.listdir('trf'):
+        if os.path.isdir('trf/' + file):
+            continue
+        print(f"Uploading {file} to GCS")
+        storage_client = storage.Client.from_service_account_json(gce_cert_json_name)
+        bucket = storage_client.bucket('cepsa_shares')
+        blob = bucket.blob(file)
+        blob.upload_from_filename(f"trf/{file}")
+        os.rename(f"trf/{file}", f"trf/transfered/{file}")
+    return
+
+
 def main():
     # call(["/usr/sbin/vpnc", "test"])
 
