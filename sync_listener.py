@@ -5,12 +5,14 @@ from time import sleep
 from cep_credentials import gce_cert_json_name, cic_host, cic_user, cic_pass, cic_database
 import MySQLdb as mdb
 import re
+import sys
+#import test_read 
 subscription_name = 'projects/mquinteiro/topics/cepsa_sync'
 
 
 # Connect to mysql, start transaction, execute the querys in the string, commit and close connection
 def exec_query(strings):
-    db = mdb.connect(host=cic_host, user=cic_user, passwd=cic_pass, db=cic_database)
+    db = mdb.connect(host=cic_host, user=cic_user, passwd=cic_pass, db=cic_database, charset='utf8')
     cur = db.cursor()
     #cur.execute("DELIMITER @ENDCOMAND@")
     cur.auto_commit = False
@@ -31,7 +33,8 @@ def exec_query(strings):
 
 # Instantiates a client and wait for pubsub events
 def main():
-
+    #print(sys.getdefaultencoding())
+    #sys.stdout.flush()
     with pubsub_v1.SubscriberClient.from_service_account_json(gce_cert_json_name) as subscriber:
         sub_path = subscriber.subscription_path(
             'mquinteiro', 'cepsa_sync-sub')

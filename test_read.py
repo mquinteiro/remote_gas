@@ -11,7 +11,7 @@ queries = s2.split('@ENDCOMAND@')
 for my_strings in queries:
     if my_strings.find("Centro Paroquial e Social") != -1:
         print(my_strings)
-        db = mdb.connect(host=cic_host, user=cic_user, passwd=cic_pass, db=cic_database)
+        db = mdb.connect(host=cic_host, user=cic_user, passwd=cic_pass, db=cic_database, charset='utf8')
         cur = db.cursor()
         cur.execute(my_strings)
         db.commit()
