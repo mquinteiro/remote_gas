@@ -16,3 +16,7 @@ launch.json
 *.pyc
 credentials.py
 BoardingPass.pdf
+# mqa ignre
+Lecturas_*.txt
+telemedidas_*.txt
+10*.xlsx

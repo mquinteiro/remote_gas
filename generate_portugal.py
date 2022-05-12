@@ -8,6 +8,7 @@ from email.utils import COMMASPACE, formatdate
 from os.path import basename
 from datetime import datetime, timedelta
 import pandas as pd
+import smtplib
 
 support_team = ['mquinteiro@cic-systems.com', 'jesus.martinez@cic-systems.com']
 
@@ -38,17 +39,17 @@ def sendEmailData(fromaddr, toaddrs, files,subj="", body=""):
     server.quit()
 
 def connect():
-    db = mdb.connect(host=cic_host, user=cic_user, passwd=cic_pass, db=cic_database)
+    db = mdb.connect(host=cic_host, user=cic_user, passwd=cic_pass, db=cic_database, charset='utf8')
     cur = db.cursor()
     cur.auto_commit = False
     return cur, db
 
 
 agencias = [(101, ["geral@gaslight.pt"], "GASLIGHT"), (103,["primegas.lda@gmail.com"], "Primegas--Tavira"),
-            (102,["ana@agrotex.es","vitor.cepsapt@agrotex.es","andre.cepsapt@agrotex.es"],"Agrotex -- Coimbra") ]
+            (102,["ana@agrotex.es","andre.cepsapt@agrotex.es"],"Agrotex -- Coimbra") ]
 def main():
     cursor, cnxn = connect()
-    start_date = datetime.now() - timedelta(days=7, hours=1)
+    start_date = datetime.now() - timedelta(days=360*15, hours=1)
     start_date_str = start_date.strftime("%Y-%m-%d %H:%M:%S")
     headers = ['Agencia', "Codigo", "Cliente", "telefono", "Num_Serie", "Fecha_Ultima_Lectura", "Nivel", "temperatura" ]
 
@@ -58,7 +59,7 @@ def main():
         sql = f"select '{nombre}',  Codigo, Direccion, t.Telefono, t.CodEquipo, if(t.HorUltCons >= l.HorLectura or(l.HorLectura is null),HorUltCons ,l.HorLectura  ), "\
                 f"if(t.HorUltCons >= l.HorLectura or(l.HorLectura is null),NivelS1 ,l.Nivel1  ) Nivel,"\
                 f"  t.Temperatura from Terminales t left join Lecturas l on l.NSerial =t.CodEquipo  where cliente = {cod_agencia} "\
-                f" and (l.HorLectura > '{start_date_str}' or HorUltCons > '{start_date_str}') order by CodEquipo"
+                f" and (l.HorLectura > '{start_date_str}' or HorUltCons > '{start_date_str}') and t.deGasNatural=3 order by Codigo asc"
         cursor.execute(sql)
         df = pd.DataFrame(cursor.fetchall(), columns=headers)
         #for row in cursor.fetchall():
@@ -68,7 +69,9 @@ def main():
         df.to_excel(filename, index=False)
         #with open(filename, "w") as f:
         #    f.write(body)
-        # sendEmailData("Niveles Telemedidas CIC", email, [filename], body="Información semanal de los niveles de las telemedidas")
+        email += support_team
+        # email = support_team  # only for testing
+        sendEmailData('jesus.martinez@cic-systems.com', email, [filename],subj="Niveles Telemedidas CIC", body="Información semanal de los niveles de las telemedidas")
         # move the file to ./enviados_{doc_agencia} directory
         os.rename(filename, f"./enviados_{cod_agencia}/{filename}")
     cnxn.close()
