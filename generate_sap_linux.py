@@ -63,7 +63,7 @@ def gen_lecturas_strings(last_date):
 
     sql_str = f"select L.NSerial, T.Telefono, T.CCanalizado, DATE_FORMAT(HorLectura, '%d/%m/%Y')  dia "\
         f", DATE_FORMAT(HorLectura, '%H:%i')  hora, Nivel1, Nivel2, Nivel3" \
-        f" from Lecturas L, Telemedidas T, DepositosAux D "\
+        f" from Lecturas L, Telemedidas_SAP T, DepositosAux D "\
         f" where L.NSerial=T.NSerial and L.NSerial = D.NSerial "\
         f" and HorLectura>'{last_date}' and D.Proveedor =0 "\
         f" order by L.NSerial";
@@ -106,9 +106,9 @@ def main():
             with open(file_name, 'w') as f:
                 for line in result_strings:
                     f.write(line + '\n')
-            # save to sftp server at /prod dir with temp file name and then rename to final file name
-            with pysftp.Connection(sftp_host, username=sftp_dev_user, password=sftp_dev_password) as sftp:
-                sftp.cwd('pro')
+            # save to sftp server at /dat dir with temp file name and then rename to final file name
+            with pysftp.Connection(sftp_host, username=sftp_pro_user, password=sftp_pro_password) as sftp:
+                sftp.cwd('dat')
                 sftp.put(file_name, temp_file_name)
                 sftp.rename(temp_file_name, file_name)
             # if nothing breaks, set last sync to now

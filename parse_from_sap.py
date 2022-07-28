@@ -119,5 +119,5 @@ def validations():
 
 
 if __name__ == "__main__":
-    #main()
-    validations()
+    main()
+    #validations()
